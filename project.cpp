@@ -684,7 +684,9 @@ static void initMaterials() {
   // copy solid prototype, and set to wireframed rendering
   g_waterMat.reset(new Material("./shaders/normal-gl3.vshader", "./shaders/normal-gl3.fshader"));
   g_waterMat->getUniforms().put("uTexColor", shared_ptr<ImageTexture>(new ImageTexture("water.ppm", true)));
-  g_waterMat->getUniforms().put("uTexNormal", shared_ptr<ImageTexture>(new ImageTexture("FieldstoneNormal.ppm", false)));
+  g_waterMat->getUniforms().put("uTexNormal", shared_ptr<ImageTexture>(new ImageTexture("waterNormal.ppm", false)));
+  g_waterMat->getRenderStates().enable(GL_BLEND);
+  g_waterMat->getRenderStates().blendFunc(GL_SRC_ALPHA, GL_DST_COLOR);
 
   // copy solid prototype, and set to color white
   g_lightMat.reset(new Material(solid));
