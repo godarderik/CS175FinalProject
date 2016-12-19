@@ -555,7 +555,7 @@ static void initGlutState(int argc, char * argv[]) {
 #endif
 
  glutInitWindowSize(g_windowWidth, g_windowHeight);      // create a window
-  glutCreateWindow("Assignment 8.5");                     // title the window
+  glutCreateWindow("Final Project");                     // title the window
 
   glutDisplayFunc(display);                               // display rendering callback
   glutReshapeFunc(reshape);                               // window reshape callback
