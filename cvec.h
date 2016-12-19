@@ -159,6 +159,21 @@ inline Cvec<T, n> normalize(const Cvec<T,n>& v) {
   return v / norm(v);
 }
 
+template<typename T, int n>
+inline Cvec<T, n> lerp(const Cvec<T, n>& v0, const Cvec<T, n>& v1, T t) {
+  return v0 + (v1 - v0) * t;
+}
+
+template<typename T, int n>
+inline Cvec<T, n> interpolateCatmullRom(const Cvec<T, n>& v0, const Cvec<T, n>& v1, const Cvec<T, n>& v2, const Cvec<T, n>& v3, const double t) {
+  const double t2 = t * t, t3 = t2 * t;
+  const double s = 1 - t, s2 = s * s, s3 = s * s2;
+  const Cvec<T, n> i1 = v1 + (v2 - v0) * (1/6.0);
+  const Cvec<T, n> i2 = v2 - (v3 - v1) * (1/6.0);
+  return v1 * s3 + i1 * (3 * s2 * t) + i2 * (3 * s * t2) + v2*t3;  // 3rd order Bezier interpolation
+}
+
+
 // element of type double precision float
 typedef Cvec <double, 2> Cvec2;
 typedef Cvec <double, 3> Cvec3;

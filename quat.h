@@ -64,6 +64,10 @@ public:
     return Quat(*this) += a;
   }
 
+  Quat operator - () const {
+    return Quat(-q_[0], -q_[1], -q_[2], -q_[3]);
+  }
+
   Quat operator - (const Quat& a) const {
     return Quat(*this) -= a;
   }
@@ -81,14 +85,10 @@ public:
     return Quat(q_[0]*a.q_[0] - dot(u, v), (v*q_[0] + u*a.q_[0]) + cross(u, v));
   }
 
-  Cvec3 operator * (const Cvec3& a) const {
+  Cvec4 operator * (const Cvec4& a) const {
     const Quat r = *this * (Quat(0, a[0], a[1], a[2]) * inv(*this));
-    return Cvec3(r[1], r[2], r[3]);
+    return Cvec4(r[1], r[2], r[3], a[3]);
   }
-    
-    bool operator == (const Quat& a) const {
-        return (q_[0] == a[0] && q_[1] == a[1] && q_[2] == a[2] && q_[3] == a[3]);
-    }
 
   static Quat makeXRotation(const double ang) {
     Quat r;
@@ -158,34 +158,36 @@ inline Matrix4 quatToMatrix(const Quat& q) {
   return r;
 }
 
-inline Quat cn(Quat q) {
-    if (q[0] < 0) {
-        return Quat(q[0] * -1, q[1] * -1, q[2] * -1, q[3] * -1);
-    }
-    return q;
+inline Quat shortRotation(const Quat& q) {
+  return q[0] < 0 ? -q : q;
 }
 
 inline Quat pow(const Quat& q, double exponent) {
-    // normalize to unit quaternion just to make sure
-    Cvec4 v = normalize(Cvec4(q[0], q[1], q[2], q[3]));
-    
-    double sinPhi = std::sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
-    double phi = std::atan2(sinPhi, v[0]);
-    
-    // return identity if angle is really small to avoid divide by sinPhi
-    if (std::abs(phi) < CS175_EPS)
-        return Quat();
-    phi *= exponent;
-    double m = std::sin(phi) / sinPhi;
-    return Quat(std::cos(phi), v[1] * m, v[2] * m, v[3] * m);
-}
+  // normalize to unit quaternion just to make sure
+  Cvec4 v = normalize(Cvec4(q[0], q[1], q[2], q[3]));
 
-inline Quat shortRotation(const Quat& q) {
-    return q[0] < 0 ? q * -1 : q;
+  double sinPhi = std::sqrt(v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+  double phi = std::atan2(sinPhi, v[0]);
+
+  // return identity if angle is really small to avoid divide by sinPhi
+  if (std::abs(phi) < CS175_EPS)
+    return Quat();
+  phi *= exponent;
+  double m = std::sin(phi) / sinPhi;
+  return Quat(std::cos(phi), v[1] * m, v[2] * m, v[3] * m);
 }
 
 inline Quat slerp(const Quat& q0, const Quat& q1, const double t) {
-    return pow(shortRotation(q1 * inv(q0)), t) * q0;
+  return pow(shortRotation(q1 * inv(q0)), t) * q0;
+}
+
+inline Quat interpolateCatmullRom(const Quat& q0, const Quat& q1, const Quat& q2, const Quat& q3, const double t) {
+  const Quat i1 = pow(shortRotation(q2 * inv(q0)), 1/6.0) * q1;
+  const Quat i2 = inv(pow(shortRotation(q3 * inv(q1)), 1/6.0)) * q2;
+  const Quat p01 = slerp(q1, i1, t);
+  const Quat p12 = slerp(i1, i2, t);
+  const Quat p23 = slerp(i2, q2, t);
+  return slerp(slerp(p01, p12, t), slerp(p12, p23, t), t);      // 3rd order Bezier interpolation version
 }
 
 

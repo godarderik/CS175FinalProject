@@ -44,7 +44,7 @@ void Particle::init(Cvec3 position, Cvec3 velocity, Cvec3 acceleration, Cvec3f c
 
 void Particle::update(float dt) {
     m_timeAlive = dt - m_initTime;
-    m_position = m_velocity * m_timeAlive + m_acceleration * 0.5f * m_timeAlive*m_timeAlive;
+    m_position = m_velocity * m_timeAlive + m_acceleration * 0.7f * m_timeAlive*m_timeAlive;
     if (m_timeAlive > m_lifetime || m_position[1] < -1) {
         reset();
     }

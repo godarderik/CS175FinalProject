@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "cvec.h"
 #include "matrix4.h"
 #include "quat.h"
 
@@ -39,17 +40,17 @@ public:
   }
 
   Cvec4 operator * (const Cvec4& a) const {
-    return Cvec4(t_, 1.0) * a[3] + Cvec4(r_ * Cvec3(a));
+    return Cvec4(t_, 0.0) * a[3] + r_ * a;
   }
 
   RigTForm operator * (const RigTForm& a) const {
-    return RigTForm(t_ + r_ * a.t_, r_*a.r_);
+    return RigTForm(t_ + Cvec3(r_ * Cvec4(a.t_, 0)), r_*a.r_);
   }
 };
 
 inline RigTForm inv(const RigTForm& tform) {
   Quat invRot = inv(tform.getRotation());
-  return RigTForm(invRot * (-tform.getTranslation()), invRot);
+  return RigTForm(Cvec3(invRot * Cvec4(-tform.getTranslation(), 1)), invRot);
 }
 
 inline RigTForm transFact(const RigTForm& tform) {
@@ -69,9 +70,14 @@ inline Matrix4 rigTFormToMatrix(const RigTForm& tform) {
   return m;
 }
 
-//inline RigTForm lerp(const RigTForm& tform0, const RigTForm& tform1, double t) {
-//    return RigTForm(lerp(tform0.getTranslation(), tform1.getTranslation(), t),
-//                    slerp(tform0.getRotation(), tform1.getRotation(), t));
-//}
+inline RigTForm lerp(const RigTForm& tform0, const RigTForm& tform1, double t) {
+  return RigTForm(lerp(tform0.getTranslation(), tform1.getTranslation(), t),
+                  slerp(tform0.getRotation(), tform1.getRotation(), t));
+}
+
+inline RigTForm interpolateCatmullRom(const RigTForm& tform0, const RigTForm& tform1, const RigTForm& tform2, const RigTForm& tform3, double t) {
+  return RigTForm(interpolateCatmullRom(tform0.getTranslation(), tform1.getTranslation(), tform2.getTranslation(), tform3.getTranslation(), t),
+                  interpolateCatmullRom(tform0.getRotation(), tform1.getRotation(), tform2.getRotation(), tform3.getRotation(), t));
+}
 
 #endif

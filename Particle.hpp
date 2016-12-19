@@ -13,7 +13,6 @@
 #include <vector>
 #include "cvec.h"
 #include <stdio.h>
-#include "ParticleData.hpp"
 #include "geometrymaker.h"
 #include <string>
 #include <memory>
@@ -45,7 +44,6 @@ class Particle {
         Particle();
     
     private:
-        ParticleData m_particleData;
         shared_ptr<Geometry> m_geometry;
     
         float m_lifetime;
